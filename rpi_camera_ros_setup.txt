@@ -1,0 +1,41 @@
+LAPTOP:
+rosrun rqt_reconfigure rqt_reconfigure
+rqt_image_view
+rosrun tf static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 /base_link /laser 10
+
+ROBOT:
+nano catkin_ws/src/raspicam_node/launch/camerav1_1280x720.launch
+roslaunch raspicam_node camerav1_1280x720.launch
+
+SETUP:
+https://github.com/UbiquityRobotics/raspicam_node/tree/indigo
+
+cd catkin_ws/src/
+git clone https://github.com/UbiquityRobotics/raspicam_node.git
+sudo rm ./raspicam_node/.git
+sudo rm ./raspicam_node/.git -r
+sudo nano /etc/ros/rosdep/sources.list.d/30-ubiquity.list #NEW FILE WITH TEXT BELOW
+(yaml https://raw.githubusercontent.com/UbiquityRobotics/rosdep/master/raspberry-pi.yaml)
+
+cd ..
+rosdep update
+rosdep install --from-path src --ignore-src --rosdistro=kinetic -y
+catkin_make
+apt-get install ros-kinetic-opencv3
+sudo apt-get install ros-kinetic-opencv3
+catkin_make
+
+# Build error, due to opencv 3.1 vs 3.2
+# Need to rebuild cv-bridge
+# Couldn't figure out how to rebuild it
+# Finally realized I just need to update it usingn apt-get install
+# Initially tried install ros-kinetic-cv_bridge
+# Failed, got sidetracked
+
+sudo apt-get update
+sudo apt-get install ros-kinetic-cv-bridge
+cd ~/catkin_ws/
+catkin_make
+
+sudo apt-get install raspi-config rpi-update
+sudo raspi-config

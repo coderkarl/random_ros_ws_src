@@ -1,0 +1,49 @@
+<launch>
+   
+    <node type="neato_laser_publisher" pkg="xv_11_laser_driver" name="neato_laser_publisher">
+      <remap from="scan" to="tilt_scan"/>
+      <param name="port" type="string" value="/dev/neato_laser" />
+      <param name="frame_id" type="string" value="laser" />
+      <param name="firmware_version" type="int" value="2" />
+    </node>
+    
+    <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler">
+      <remap from="scan" to="tilt_scan"/>
+      <remap from="cloud" to="pc2"/>
+      <param name="max_scans" type="int" value="1" />
+      <param name="fixed_frame" type="string" value="base_link" />
+    </node>
+
+    <!-- run pointcloud_to_laserscan node -->
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
+
+        <remap from="cloud_in" to="pc2"/>
+        <rosparam>
+            target_frame: base_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.1
+            min_height: -0.15
+            max_height: 2.0
+
+            angle_min: -3.14 # -M_PI/2
+            angle_max: 3.14 # M_PI/2
+            angle_increment: 0.001 # M_PI/360.0
+            scan_time: 0.1
+            range_min: 0.1
+            range_max: 5
+            use_inf: true
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+
+    </node>
+    
+    <node type ="laser2pc.py" pkg="jeep_ros_comm" name="laser2pc"/>
+    
+    <!-- node type ="test_imu_lidar_ros_comm.py" pkg="jeep_ros_comm" name="jeep_comm" / -->
+
+</launch>
+

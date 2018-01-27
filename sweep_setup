@@ -1,0 +1,68 @@
+udevadm info -a -n /dev/ttyUSB1 | grep '{idVendor'} | head -n1
+    ATTRS{idVendor}=="0403"
+ubuntu@kpi3:~$ udevadm info -a -n /dev/ttyUSB1 | grep '{idProduct}' | head -n1
+    ATTRS{idProduct}=="6015"
+ubuntu@kpi3:~$ udevadm info -a -n /dev/ttyUSB1 | grep '{serial}' | head -n1
+    ATTRS{serial}=="DO008OAY"
+
+sudo nano /etc/udev/rules.d/97-usb-serial.rules
+call the symlink sweep
+What do I do to apply these rules without starting a new terminal?
+
+rosrun tf static_transform_publisher 0 0 0 0.0 0 0 /baseink /laser 10
+(I think yaw(rad) is the first input in the second set of three)
+
+roslaunch my_joystick jeep_joystick.launch
+
+rosrun rviz rviz
+
+rosrun gmapping slam_gmapping
+
+rqt_image_view
+
+rosrun rqt_reconfigure rqt_reconfigure
+
+rosrun web_video_server web_video_server (NOT WORKING)
+
+
+
+roslaunch sweep_ros sweep2scan.launch
+
+rosrun jeep_ros_comm jeep_ros_comm.py (see other py too)
+
+roslaunch raspicam_node *camerav1*.launch
+
+########################
+RECORD
+rosbag record -O slamData3 /pc2 /rosout /tf /scan /rosout_agg /odom
+
+PLAYBACK
+roscore
+rosparam set use_sim_time true
+rosrun rviz rviz
+rosrun tf static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 /base_link /laser 10
+rosrun gmapping slam_gmapping
+rosbag play slamData3.bag --clock
+
+NO TABS IN LAUNCH FILES! JUST SPACES.
+I THINK YOU HAVE CONFLICTING tf DATA IN THE PLAYBACK. /odom and /map are jumping.
+THIS MAY BE DUE TO YOUR /tf BEING PUBLISHED FROM rosback play
+
+############
+roslaunch sweep_ros gmap_mod_params.launch
+rosrun map_server map_saver -f tuned_yard_map5
+
+##### DEALING WITH ROSBAG FILE PLAYBACK, OMIT SOME TF
+## See bag_files_ROS/map_odom_rosbag_filter_tf.sh
+cd bag_files_ROS/
+chmod 755 debug_rosbag_filt.sh 
+./debug_rosbag_filt.sh 
+rosbag info filtered.bag
+
+rostopic echo /odom/twist/twist/angular/z >> yawrate1.txt
+python bag_to_csv.py
+
+##### Concluded it is easiest to NOT run gmapping slam_gmapping in realtime while recording and moving jeep
+###### That way the tf from slam is not there to get in the way when doing playback
+cd noGyroFactorData/
+rosbag record -O houseLap1 /pc2 /rosout /tf /scan /odom

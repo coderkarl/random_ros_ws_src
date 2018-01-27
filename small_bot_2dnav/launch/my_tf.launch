@@ -1,0 +1,13 @@
+<launch>
+
+  <!--<node pkg="xv_11_laser_driver" type="neato_laser_publisher" name="xv_11_node">
+    <param name="port" value="/dev/neato_laser"/>
+    <param name="firmware_version" value="2"/>
+    <param name="frame_id" value="laser"/>
+  </node>-->
+
+ 
+  <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0.0 0.0 0.0 0 0 0.0 /odom /base_link 10"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="base_frame_laser" args="-0.05 0 0 0 0 0 /base_link /laser 10"/>
+</launch>

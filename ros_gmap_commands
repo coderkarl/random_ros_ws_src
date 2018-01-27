@@ -1,0 +1,83 @@
+rosrun xv_11_laser_driver neato_laser_publisher _port:=/dev/neato_laser _frame_id:=laser
+
+rosrun tf static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 /base_link /laser 10
+
+roslaunch ca_driver create_2.launch
+
+
+roslaunch my_joystick create_joystick.launch
+
+rosrun gmapping slam_gmapping
+
+rosrun rviz rviz
+
+## SEE
+cd bag_files_ROS/noGyroFactorData/
+
+roslaunch sweep_ros sweep2scan.launch 
+
+rosbag record -O houseLap1 /pc2 /rosout /tf /scan /odom
+rosbag play houseLap1.bag --clock
+
+rosbag record -O garageLap1 /pc2 /rosout /tf /scan /odom
+
+rosparam set use_sim_time true
+rosbag play garageLap1.bag --clock
+rosrun rviz rviz
+roslaunch sweep_ros gmap_mod_params.launch 
+rosrun map_server map_saver -f ./garageLap1_map
+
+
+## NOW AMCL:
+rosrun map_server map_server /home/karl/bag_files_ROS/noGyroFactorData/backyardPerim3_mapC.yaml
+roslaunch small_bot_2dnav move_base.launch 
+roslaunch small_bot_2dnav just_amcl.launch
+roslaunch small_bot_2dnav just_amcl_params.launch
+roslaunch small_bot_2dnav just_amcl_params1.launch 
+roslaunch small_bot_2dnav just_amcl_params2.launch
+
+sudo nano /opt/ros/kinetic/share/amcl/examples/amcl_diff.launch
+
+## Recent tests:
+rqt_image_view
+roslaunch my_joystick vel_jeep_joystick.launch
+rosbag record -O jeep_gnd_filt_Nov14_runshort_run3.bag /pc2 /rosout /tf /scan /odom /tf_static /rosout_agg /cmd_vel
+roslaunch small_bot_2dnav just_amcl_params2.launch
+rosrun map_server map_server /home/karl/bag_files_ROS/slam_localize_yard_data_Nov2017/cleaned_maps_Nov11_run1/big_run_map1u_clean.yaml
+karl@VKLinux:~/bag_files_ROS/slam_localize_yard_data_Nov2017$      rosbag play --clock jeep_gnd_filt_Nov14_runshort_run3.bag
+rostopic echo clicked_point
+
+## OTHER ROS COMMANDS
+sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+rosbag record -O backyard_localize_Nov10_run2.bag /pc2 /rosout /tf /scan /odom
+rosbag record -O backyard_localize_camera_Nov10_run4.bag /pc2 /rosout /tf /scan /odom /tf_static /rosout_agg /raspicam_node/image/compressed /cmd_vel
+chmod +x catkin_ws/src/jeep_ros_comm/scripts/test_imu_lidar_ros_comm.py
+rosrun rqt_graph rqt_graph
+rosbag play --clock test_laser.bag 
+rqt_image_view
+rosrun map_server map_server combo_frontD_backC_cleaned.yaml
+rosrun map_server map_server /home/karl/bag_files_ROS/slam_localize_yard_data_Nov2017/cleaned_maps_Nov11_run1/big_run_map1u_clean.yaml
+rosbag play ~/bag_files_ROS/slam_localize_yard_data_Nov2017/jeep_and_camera_Nov11_run1.bag --clock
+rostopic echo /amcl_pose
+rosrun dynamic_reconfigure reconfigure_gui 
+rosrun dynamic_reconfigure dynparam list
+rosrun dynamic_reconfigure dynparam set /raspicam_node shutterSpeed 70000
+rosrun rqt_reconfigure rqt_reconfigure
+rosbag record -O camera_details_sweep2Hz_Nov24_run10.bag /pc2 /rosout /tf /scan /odom /tf_static /rosout_agg /raspicam_node/image/compressed /raspicam_node/camera_info /raspicam_node/parameter_descriptions /raspicam_node/parameter_updates /cmd_vel
+rosrun map_server map_server /home/karl/bag_files_ROS/slam_localize_yard_data_Nov2017/data_Nov23/maps_clean_Nov23/big_run_map1u_clean_append6.yaml
+
+## On kpi3
+sudo apt-get install ros-kinetic-hector-laserscan-to-pointcloud
+roslaunch jeep_ros_comm filter_ground_lasers.launch
+rosrun xv_11_laser_driver neato_laser_publisher _port:=/dev/neato_laser _frame_id:=$
+roslaunch jeep_ros_comm filter_ground_lasers.launch
+ps -ef | grep python
+kill -9 1905
+rosrun tf static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 /base_link /laser 10
+rosrun jeep_ros_comm test_imu_lidar_ros_comm.py
+nano catkin_ws/src/raspicam_node/launch/camerav1_1280x720.launch
+roslaunch raspicam_node camerav1_1280x720.launch
+roslaunch sweep_ros sweep2scan.launch
+rosrun jeep_ros_comm jeep_ros_comm.py
+sudo date -s "Thu Nov 23 13:52:01 CST 2017"
+ntpdate -q VKLinux

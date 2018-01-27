@@ -1,0 +1,25 @@
+<launch>
+
+ <!-- joy node -->
+  <node respawn="true" pkg="joy"
+        type="joy_node" name="bot_joystick" >
+    <param name="dev" type="string" value="/dev/input/js0" />
+    <param name="deadzone" value="0.15" />
+    <!-- <param name="autorepeat_rate" value = "20" /> -->
+  </node>
+
+ <!-- Axes -->
+  <param name="axis_left" value="1" type="int"/>
+  <param name="axis_right" value="3" type="int"/>
+  
+  <param name="drive_type" value="2" type="int"/>
+  <param name="scale_cmd" value="100" type="double"/>
+  <param name="scale_steer" value="1" type="double"/>
+  <node pkg="my_joystick" type="teleop_joy" name="teleop"/>
+
+  <!-- for odom -->
+  <param name="min_drive_cmd" value="8" type="int"/>
+  <param name="scale_linear_mps" value="0.02" type="double"/>
+  <param name="wheel_base" value="0.76" type="double"/>
+  <param name="max_steer_deg" value="18.0" type="double"/> 
+</launch>
